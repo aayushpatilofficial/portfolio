@@ -5,7 +5,9 @@ from datetime import datetime
 from flask_mail import Mail, Message
 
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET", "dev-secret")  # change for production
+app.secret_key = os.getenv("FLASK_SECRET")
+if not app.secret_key:
+    raise ValueError("FLASK_SECRET environment variable must be set for security")
 
 # -----------------------------
 # Email configuration (Replit/Render ready)
@@ -108,10 +110,7 @@ def contact():
 
     return redirect(url_for("index") + "#contact")
 
-# Contacts viewer (optional, remove in prod)
-@app.route("/_contacts")
-def _contacts():
-    return jsonify(read_json(CONTACTS_FILE))
+# Contacts viewer removed for production security
 
 # -----------------------------
 # Run server (dev) or use gunicorn in production
