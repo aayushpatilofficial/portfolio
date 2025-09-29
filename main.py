@@ -13,7 +13,7 @@ if not app.secret_key:
 # Email configuration (Replit/Render ready)
 # -----------------------------
 MAIL_USER = os.getenv("EMAIL_USER", "aayushpatilofficial@gmail.com")
-MAIL_PASS = os.getenv("EMAIL_PASS", "")  # use App Password in production
+MAIL_PASS = os.getenv("EMAIL_PASS", "pyge mxuy dzsb wqtl")  # use App Password in production
 
 app.config.update(
     MAIL_SERVER="smtp.gmail.com",
