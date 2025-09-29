@@ -1,0 +1,14 @@
+[
+  {
+    "id": 1,
+    "title": "Math Quiz App",
+    "desc": "Interactive advanced math quizzes.",
+    "tags": ["Flask", "AI", "Quiz"]
+  },
+  {
+    "id": 2,
+    "title": "HopePulse Prototype",
+    "desc": "Wearable mental health demo.",
+    "tags": ["Hardware", "ML"]
+  }
+]
