@@ -7,23 +7,32 @@ from flask_mail import Mail, Message
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET", "dev-secret")  # change for production
 
-# Email configuration
-app.config["MAIL_SERVER"] = "smtp.gmail.com"
-app.config["MAIL_PORT"] = 587
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USE_SSL"] = False
-app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME", "aayushpatilofficial@gmail.com")  # your email
-app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD", "hvuo jrps fvfn bgvc")   # app password
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME", "aayushpatilofficial@gmail.com")
+# -----------------------------
+# Email configuration (Replit/Render ready)
+# -----------------------------
+MAIL_USER = os.getenv("EMAIL_USER", "aayushpatilofficial@gmail.com")
+MAIL_PASS = os.getenv("EMAIL_PASS", "")  # use App Password in production
+
+app.config.update(
+    MAIL_SERVER="smtp.gmail.com",
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USE_SSL=False,
+    MAIL_USERNAME=MAIL_USER,
+    MAIL_PASSWORD=MAIL_PASS,
+    MAIL_DEFAULT_SENDER=MAIL_USER
+)
 
 mail = Mail(app)
 
-# Paths
+# -----------------------------
+# Data paths
+# -----------------------------
 DATA_DIR = "data"
 CONTACTS_FILE = os.path.join(DATA_DIR, "contacts.json")
 PORTFOLIO_FILE = os.path.join(DATA_DIR, "portfolio.json")
 
-# Ensure data dir exists
+# Ensure data directory exists
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # Initialize files if missing
@@ -33,23 +42,15 @@ if not os.path.exists(CONTACTS_FILE):
 
 if not os.path.exists(PORTFOLIO_FILE):
     sample = [
-        {
-            "id": 1,
-            "title": "Math Quiz App",
-            "desc": "Interactive advanced math quizzes.",
-            "tags": ["Flask", "AI", "Quiz"]
-        },
-        {
-            "id": 2,
-            "title": "HopePulse Prototype",
-            "desc": "Wearable mental health demo.",
-            "tags": ["Hardware", "ML"]
-        }
+        {"id": 1, "title": "Math Quiz App", "desc": "Interactive advanced math quizzes.", "tags": ["Flask", "AI", "Quiz"]},
+        {"id": 2, "title": "HopePulse Prototype", "desc": "Wearable mental health demo.", "tags": ["Hardware", "ML"]}
     ]
     with open(PORTFOLIO_FILE, "w") as f:
         json.dump(sample, f, indent=2)
 
+# -----------------------------
 # Helpers
+# -----------------------------
 def read_json(path):
     with open(path, "r") as f:
         return json.load(f)
@@ -63,7 +64,9 @@ def write_json(path, data):
 def inject_now():
     return {"datetime": datetime}
 
+# -----------------------------
 # Routes
+# -----------------------------
 @app.route("/")
 def index():
     portfolio = read_json(PORTFOLIO_FILE)
@@ -84,24 +87,17 @@ def contact():
         flash("Please fill all required fields.", "error")
         return redirect(url_for("index") + "#contact")
 
-    entry = {
-        "name": name,
-        "email": email,
-        "message": message,
-        "time": datetime.utcnow().isoformat() + "Z"
-    }
-
     # Save to contacts.json
+    entry = {"name": name, "email": email, "message": message, "time": datetime.utcnow().isoformat() + "Z"}
     contacts = read_json(CONTACTS_FILE)
     contacts.insert(0, entry)
     write_json(CONTACTS_FILE, contacts)
 
-    # Send email
+    # Send email safely
     try:
         msg = Message(
             subject=f"New Contact Form Submission from {name}",
-            sender=app.config["MAIL_DEFAULT_SENDER"],
-            recipients=[os.getenv("EMAIL_USER", "aayushpatilofficial@gmail.com")],  # your email
+            recipients=[MAIL_USER],  # your email
             body=f"Name: {name}\nEmail: {email}\nMessage:\n{message}"
         )
         mail.send(msg)
@@ -112,10 +108,13 @@ def contact():
 
     return redirect(url_for("index") + "#contact")
 
-# Simple contacts viewer (not protected) — remove or protect in prod
+# Contacts viewer (optional, remove in prod)
 @app.route("/_contacts")
 def _contacts():
     return jsonify(read_json(CONTACTS_FILE))
 
+# -----------------------------
+# Run server (dev) or use gunicorn in production
+# -----------------------------
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
