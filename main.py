@@ -117,4 +117,6 @@ def _contacts():
 # Run server (dev) or use gunicorn in production
 # -----------------------------
 if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    # Only run in debug mode if explicitly running the file directly
+    is_development = os.getenv("FLASK_ENV", "development") == "development"
+    app.run(debug=is_development, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
