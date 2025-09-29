@@ -12,9 +12,9 @@ app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
 app.config["MAIL_USE_SSL"] = False
-app.config["MAIL_USERNAME"] = os.getenv("aayushpatilofficial@gmail.com")  # your email
-app.config["MAIL_PASSWORD"] = os.getenv("aayush@2011")   # app password
-app.config["MAIL_DEFAULT_SENDER"] = os.getenv("EMAIL_USER")
+app.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME", "aayushpatilofficial@gmail.com")  # your email
+app.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD", "aayush@2011")   # app password
+app.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_USERNAME", "aayushpatilofficial@gmail.com")
 
 mail = Mail(app)
 
@@ -100,7 +100,8 @@ def contact():
     try:
         msg = Message(
             subject=f"New Contact Form Submission from {name}",
-            recipients=[os.getenv("EMAIL_USER")],  # your email
+            sender=app.config["MAIL_DEFAULT_SENDER"],
+            recipients=[os.getenv("EMAIL_USER", "aayushpatilofficial@gmail.com")],  # your email
             body=f"Name: {name}\nEmail: {email}\nMessage:\n{message}"
         )
         mail.send(msg)
